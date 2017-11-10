@@ -18,13 +18,13 @@ public class DataBase extends SQLiteOpenHelper {
 
     public static class FeedEntry implements BaseColumns {
         public static final String TABLE_NAME = "Photos";
-        public static final String COLUMN_NAME_NUMBER = "number";
+        public static final String COLUMN_PHOTO_PATH = "path";
     }
 
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + FeedEntry.TABLE_NAME + " (" +
                     FeedEntry._ID + " INTEGER PRIMARY KEY," +
-                    FeedEntry.COLUMN_NAME_NUMBER + " TEXT)" ;
+                    FeedEntry.COLUMN_PHOTO_PATH + " TEXT)" ;
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + FeedEntry.TABLE_NAME;
@@ -45,16 +45,17 @@ public class DataBase extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addData(String number) {
+    public void addData(String path) {
         // Gets the data repository in write mode
         SQLiteDatabase db = this.getWritableDatabase();
 
 // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(FeedEntry.COLUMN_NAME_NUMBER, number);
+        values.put(FeedEntry.COLUMN_PHOTO_PATH, path);
 
 // Insert the new row, returning the primary key value of the new row
         long newRowId = db.insert(FeedEntry.TABLE_NAME, null, values);
+        db.close();
     }
 
     public List getData(){
@@ -64,7 +65,7 @@ public class DataBase extends SQLiteOpenHelper {
         List itemIds = new ArrayList<>();
         while(data.moveToNext()) {
             long itemId = data.getLong(
-                    data.getColumnIndexOrThrow(FeedEntry.COLUMN_NAME_NUMBER));
+                    data.getColumnIndexOrThrow(FeedEntry.COLUMN_PHOTO_PATH));
             itemIds.add(itemId);
         }
         data.close();

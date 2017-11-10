@@ -1,14 +1,12 @@
 package example.memory;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -25,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static example.memory.DataBase.DATABASE_NAME;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,19 +31,25 @@ public class MainActivity extends AppCompatActivity {
     private static final int minPhotos=4;
     private final static int maxPhotos=10;
     private static DataBase mDbHelper;
-    private ImageView img1,img2,img3,img4;
     private static final int REQUEST_TAKE_PHOTO = 1;
     private String mCurrentPhotoPath;
+    private List<ImageView> listOfImage;
+    private List<String> listOfmCurrentPhotos;
+    private ImageView img1,img2,img3,img4;
+    private int index = 0 ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mDbHelper = new DataBase(this);
         final Button newGameButton = (Button) findViewById(R.id.newGame);
+        mDbHelper = new DataBase(this);
         img1 = (ImageView) findViewById(R.id.imageView1);
         img2 = (ImageView) findViewById(R.id.imageView2);
         img3 = (ImageView) findViewById(R.id.imageView3);
         img4 = (ImageView) findViewById(R.id.imageView4);
+        listOfImage = new ArrayList<>();
+        listOfmCurrentPhotos = new ArrayList<>();
+        listOfImage.add(img1); listOfImage.add(img2); listOfImage.add(img3); listOfImage.add(img4);
         newGameButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 editText = createNumberInput();
@@ -55,10 +58,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     private EditText createNumberInput() {
         EditText numberOfPhotos = new EditText(this);
         numberOfPhotos.setInputType(2);
-        numberOfPhotos.setHint("Write number of photos which you want to use");
+        numberOfPhotos.setHint("Write number of photos");
         numberOfPhotos.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         RelativeLayout myLayout = (RelativeLayout) findViewById(R.id.layoutForText);
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -74,39 +78,33 @@ public class MainActivity extends AppCompatActivity {
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                 int number = Integer.parseInt(textView.getText().toString());
                 if(number >= minPhotos && number <=maxPhotos) {
-                    dispatchTakePictureIntent();
+                    for(int k=0; k<4; k++) {
+                        dispatchTakePictureIntent();
+                    }
+                }
+                else if(number == 99) {
+                    List kappa = mDbHelper.getData();
+                    for(int j =0; j<kappa.size(); j++)
+                    {
+                        toastMessage(kappa.get(j).toString());
+                    }
                 }
                 else {
                     toastMessage("Number must be between 4 to 10");
-                    /*List kappa = mDbHelper.getData();
-                    for(int j =0; j<kappa.size(); j++)
-                    {
-                         toastMessage(kappa.get(j).toString());
-                    }*/
-                    img1.setImageURI(Uri.parse(mCurrentPhotoPath));
-                   /* img2.setImageURI(Uri.parse(kappa.get(2).toString()));
-                    img3.setImageURI(Uri.parse(kappa.get(3).toString()));
-                    img4.setImageURI(Uri.parse(kappa.get(4).toString()));*/
                 }
                 return  false;
             }
         });
     }
-    public void onStop() {
+    /*public void onStop() {
         this.deleteDatabase(mDbHelper.DATABASE_NAME);
         super.onStop();
-    }
-
-  /*  private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
     }*/
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            mDbHelper.addData(mCurrentPhotoPath);
+            listOfImage.get(this.index).setImageURI(Uri.parse(listOfmCurrentPhotos.get(index)));
+            this.index++;
         }
     }
     private File createImageFile() throws IOException {
@@ -122,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
+        this.listOfmCurrentPhotos.add(mCurrentPhotoPath);
         return image;
     }
     private void dispatchTakePictureIntent() {

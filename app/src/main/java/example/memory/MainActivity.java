@@ -21,6 +21,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -33,16 +34,19 @@ public class MainActivity extends AppCompatActivity {
     private static final int minPhotos=4;
     private final static int maxPhotos=10;
     private static DataBase mDbHelper;
-    private ImageView img;
+    private ImageView img1,img2,img3,img4;
     private static final int REQUEST_TAKE_PHOTO = 1;
-    String mCurrentPhotoPath;
+    private String mCurrentPhotoPath;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mDbHelper = new DataBase(this);
         final Button newGameButton = (Button) findViewById(R.id.newGame);
-        img = (ImageView) findViewById(R.id.imageView1);
+        img1 = (ImageView) findViewById(R.id.imageView1);
+        img2 = (ImageView) findViewById(R.id.imageView2);
+        img3 = (ImageView) findViewById(R.id.imageView3);
+        img4 = (ImageView) findViewById(R.id.imageView4);
         newGameButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 editText = createNumberInput();
@@ -74,6 +78,15 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     toastMessage("Number must be between 4 to 10");
+                    /*List kappa = mDbHelper.getData();
+                    for(int j =0; j<kappa.size(); j++)
+                    {
+                         toastMessage(kappa.get(j).toString());
+                    }*/
+                    img1.setImageURI(Uri.parse(mCurrentPhotoPath));
+                   /* img2.setImageURI(Uri.parse(kappa.get(2).toString()));
+                    img3.setImageURI(Uri.parse(kappa.get(3).toString()));
+                    img4.setImageURI(Uri.parse(kappa.get(4).toString()));*/
                 }
                 return  false;
             }
@@ -93,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            img.setImageURI(Uri.parse(mCurrentPhotoPath));
+            mDbHelper.addData(mCurrentPhotoPath);
         }
     }
     private File createImageFile() throws IOException {
@@ -109,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
-        toastMessage(mCurrentPhotoPath);
         return image;
     }
     private void dispatchTakePictureIntent() {

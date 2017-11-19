@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,7 +12,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,37 +19,25 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText editText;
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_CAPTURE=1;
     private static final int minPhotos=4;
     private final static int maxPhotos=10;
     private static DataBase mDbHelper;
-    private static final int REQUEST_TAKE_PHOTO = 1;
-    private String mCurrentPhotoPath;
-    private List<ImageView> listOfImage;
-    private List<String> listOfmCurrentPhotos;
-    private ImageView img1,img2,img3,img4;
-    private int index = 0 ;
+    private static final int REQUEST_TAKE_PHOTO = 4;
+    private int numberOgPhotosTaken;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final Button newGameButton = (Button) findViewById(R.id.newGame);
         mDbHelper = new DataBase(this);
-        img1 = (ImageView) findViewById(R.id.imageView1);
-        img2 = (ImageView) findViewById(R.id.imageView2);
-        img3 = (ImageView) findViewById(R.id.imageView3);
-        img4 = (ImageView) findViewById(R.id.imageView4);
-        listOfImage = new ArrayList<>();
-        listOfmCurrentPhotos = new ArrayList<>();
-        listOfImage.add(img1); listOfImage.add(img2); listOfImage.add(img3); listOfImage.add(img4);
+        this.deleteDatabase(mDbHelper.DATABASE_NAME);
         newGameButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 editText = createNumberInput();
@@ -64,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
         numberOfPhotos.setInputType(2);
         numberOfPhotos.setHint("Write number of photos");
         numberOfPhotos.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        RelativeLayout myLayout = (RelativeLayout) findViewById(R.id.layoutForText);
-        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        ConstraintLayout myLayout = (ConstraintLayout) findViewById(R.id.MainLayout);
+        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
         myLayout.addView(numberOfPhotos,lp);
         return numberOfPhotos;
     }
@@ -82,13 +70,6 @@ public class MainActivity extends AppCompatActivity {
                         dispatchTakePictureIntent();
                     }
                 }
-                else if(number == 99) {
-                    List kappa = mDbHelper.getData();
-                    for(int j =0; j<kappa.size(); j++)
-                    {
-                        toastMessage(kappa.get(j).toString());
-                    }
-                }
                 else {
                     toastMessage("Number must be between 4 to 10");
                 }
@@ -96,15 +77,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    /*public void onStop() {
-        this.deleteDatabase(mDbHelper.DATABASE_NAME);
-        super.onStop();
-    }*/
-
+    private void startGame(int numberOfPhotos) {
+        Intent intent = new Intent(MainActivity.this, MemoryActivity.class);
+        //intent.putExtra("numberOfPhotos",numberOfPhotos);
+        startActivity(intent);
+    }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            listOfImage.get(this.index).setImageURI(Uri.parse(listOfmCurrentPhotos.get(index)));
-            this.index++;
+            if(numberOgPhotosTaken == )
+            startGame(4);
         }
     }
     private File createImageFile() throws IOException {
@@ -119,8 +100,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        this.listOfmCurrentPhotos.add(mCurrentPhotoPath);
+        mDbHelper.addData(image.getAbsolutePath());
         return image;
     }
     private void dispatchTakePictureIntent() {

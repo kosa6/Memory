@@ -64,7 +64,7 @@ public class DataBase extends SQLiteOpenHelper {
         Cursor data = db.rawQuery(query, null);
         List itemIds = new ArrayList<>();
         while(data.moveToNext()) {
-            long itemId = data.getLong(
+            String itemId = data.getString(
                     data.getColumnIndexOrThrow(FeedEntry.COLUMN_PHOTO_PATH));
             itemIds.add(itemId);
         }
